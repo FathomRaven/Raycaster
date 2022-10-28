@@ -31,6 +31,13 @@ Raycaster::Raycaster()
     }
 }
 
+Raycaster::~Raycaster()
+{
+    mGraphics = nullptr;
+    mInput = nullptr;
+    mTimer = nullptr;
+}
+
 void Raycaster::Render()
 {
     //Draw here
