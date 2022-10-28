@@ -10,7 +10,7 @@ public:
     static const int SCREEN_WIDTH = 1024;
     static const int SCREEN_HEIGHT = 768;
 
-    const char* WINDOW_TITLE = "Tutorial";
+    const char* WINDOW_TITLE = "Raycaster";
 
     static Graphics* Instance();
     static void Release();
