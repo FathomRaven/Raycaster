@@ -14,6 +14,7 @@ struct Level
 {
     unsigned int width, height;
     std::vector<std::vector<int>> data;
+    Vector2 playerPosition;
 };
 
 class Raycaster
@@ -38,6 +39,9 @@ private:
     SDL_Rect floor;
 
     Level level;
+    unsigned int currentLevel = 1;
+    unsigned int maxLevels = 2;
+    std::string levelData;
 
-    void LoadMap(Level &level, const char* s);
+    void LoadMap(Level &map, std::string s);
 };
