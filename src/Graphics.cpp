@@ -83,3 +83,9 @@ void Graphics::DrawLine(SDL_Color color, int startX, int startY, int endX, int e
     SDL_SetRenderDrawColor(mRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderDrawLine(mRenderer, startX, startY, endX, endY);
 }
+
+void Graphics::DrawRectangle(SDL_Color color, SDL_Rect& rect)
+{
+    SDL_SetRenderDrawColor(mRenderer, color.r, color.g, color.b, color.a);
+    SDL_RenderFillRect(mRenderer, &rect);
+}
