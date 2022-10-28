@@ -44,7 +44,6 @@ int main(int argc, char ** argv){
 
             raycaster.Render();
             raycaster.Update();
-
             
             mGraphics->Render();
             mInput->UpdatePrevInput();

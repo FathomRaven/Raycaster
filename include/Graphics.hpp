@@ -19,6 +19,7 @@ public:
     void ClearBackBuffer();
     void Render();
     void DrawLine(SDL_Color color, int startX, int startY, int endX, int endY);
+    void DrawRectangle(SDL_Color color, SDL_Rect& rect);
 
 private:
     static Graphics* sInstance;

@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <fstream>
+#include <istream>
 
 struct Level
 {
@@ -33,11 +35,10 @@ private:
     Vector2 dir = {-1, 0};
     Vector2 plane = {0, 0.66};
 
-    // double moveSpeed = 1.0;
-    // double rotationSpeed = 0.1;
-
-    double curTick = 0;
-    double prevTick = 0;
+    SDL_Rect ceiling;
+    SDL_Rect floor;
 
     Level level;
+
+    void LoadMap(const char* s);
 };
