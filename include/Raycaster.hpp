@@ -9,12 +9,11 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include <istream>
 
 struct Level
 {
     unsigned int width, height;
-    std::vector<std::string> data;
+    std::vector<std::vector<int>> data;
 };
 
 class Raycaster
@@ -40,5 +39,5 @@ private:
 
     Level level;
 
-    void LoadMap(const char* s);
+    void LoadMap(Level &level, const char* s);
 };

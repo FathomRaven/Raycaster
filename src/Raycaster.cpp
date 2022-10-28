@@ -1,16 +1,29 @@
 #include "Raycaster.hpp"
 
-// void Raycaster::LoadMap(const char* s) {
-// 	std::fstream fin (s);
-// 	fin >> level.height >> level.width;
-// 	level.data = std::vector<std::vector<int>>(level.height, std::vector<int>(level.width, 0));
-// 	for (int x = 0;  x < level.height; x++) {
-// 		for (int y = 0; y < level.width; y++) {
-// 			fin >>	level.data[x][y];
-// 		}
-// 	}
-// 	fin.close();
-// }
+void Raycaster::LoadMap(Level &level, const char* s) {
+    
+    std::vector<int> line;
+
+	std::fstream fin (s);
+    std::string output;
+    while(getline(fin, output))
+    {
+        for (unsigned long x = 0; x < output.size(); x++)
+        {
+            if(output[x] != ',')
+                line.push_back(std::atoi(&output[x]));    
+
+        }
+        // std::cout << "\n";
+        level.data.push_back(line);
+        line = {};
+    }
+
+    level.height = level.data.size();
+    level.width = level.data[0].size();
+
+	fin.close();
+}
 
 Raycaster::Raycaster()
 {
@@ -18,22 +31,7 @@ Raycaster::Raycaster()
     mInput = Input::Instance();
     mTimer = Timer::Instance();
 
-    level.data = 
-   {"111111111",
-    "100000001",
-    "100010001",
-    "100111001",
-    "100010001",
-    "100010001",
-    "100010001",
-    "100000001",
-    "111111111"
-    };
-
-    level.width = 9;
-    level.height = 9;
-
-    // LoadMap("res/maps/level1.data");
+    LoadMap(level, "res/maps/level1.data");
 
     ceiling.x = 0;
     ceiling.y = 0;
@@ -47,14 +45,15 @@ Raycaster::Raycaster()
 
     pos = {3.0f, 3.0f};
 
-    for (unsigned int i = 0; i < level.width; i++)
+    for (unsigned int i = 0; i < level.height; i++)
     {
-        for (unsigned int j = 0; j < level.height; j++)
+        for (unsigned int j = 0; j < level.width; j++)
         {
-            std::cout << level.data[i].at(j);
+            std::cout << level.data[i][j];
         }
         std::cout << std::endl;
     }
+    
 }
 
 Raycaster::~Raycaster()
@@ -124,36 +123,11 @@ void Raycaster::Render()
                 side = 1;
             }
 
-            if(level.data[mapc.x][mapc.y]>'0') // the ray has hit a non-zero block at position mapc.x, mapc.y
+            if(level.data[mapc.x][mapc.y]>0) // the ray has hit a non-zero block at position mapc.x, mapc.y
             {
                 hit = 1;
             }
         }
-
-        //TODO: Figure out depth of field :trolflan:
-        // int dof = 0;
-        // for (int i = 8; i < dof; i++)
-        // {
-        //     if(sideDist.x < sideDist.y)
-        //     {
-        //         sideDist.x += deltaDist.x;
-        //         mapc.x += step.x;
-        //         side = 0;
-        //     }
-        //     else
-        //     {
-        //         sideDist.y += deltaDist.y;
-        //         mapc.y += step.y;
-        //         side = 1;
-        //     }
-
-        //     if(level.data[mapc.x][mapc.y]>'0') // the ray has hit a non-zero block at position mapc.x, mapc.y
-        //     {
-        //         hit = 1;
-        //         break;
-        //     }
-        // }
-
         
         //Avoids fisheye effect
         if(side == 0) perpWallDist = (sideDist.x - deltaDist.x);
@@ -167,34 +141,39 @@ void Raycaster::Render()
         if(drawEnd >= mGraphics->SCREEN_HEIGHT) drawEnd = mGraphics->SCREEN_HEIGHT - 1;
 
         SDL_Color color;
-        color.r = 100;
+        color.r = 0;
         color.g = 0;
-        color.b = 100;
+        color.b = 0;
         color.a = 255;
-        // switch (level.level[mapc.x][mapc.y])
-        // {
-        // case '1':
-        //     color.r = 255;
-        //     break;
-        // case '2':
-        //     color.g = 255;
-        //     break;
+        switch (level.data[mapc.x][mapc.y])
+        {
+        case 1:
+            color.r = 255;
+            break;
+        case 2:
+            color.g = 255;
+            break;
 
-        // case '3':
-        //     color.b = 255;
-        //     break;
+        case 3:
+            color.b = 255;
+            break;
 
-        // case '4':
-        //     color.r = 140;
-        //     color.g = 70;
-        //     color.b = 20;
-        //     break;
+        case 4:
+            color.r = 140;
+            color.g = 70;
+            color.b = 20;
+            break;
+        case 5:
+            color.r = 255;
+            color.g = 0;
+            color.b = 255;
+            break;
         
-        // default:
-        //     color.g = 100;
-        //     color.b = 100;
-        //     break;
-        // }
+        default:
+            color.g = 100;
+            color.b = 100;
+            break;
+        }
 
         if(side == 1)
         {
@@ -213,37 +192,42 @@ void Raycaster::Update()
     double rotationSpeed = mTimer->DeltaTime() * 2.0;
     double angle = 1.571; // angle for side movement (-left/+right)
 
+    if(mInput->KeyDown(SDL_SCANCODE_LSHIFT))
+    {
+        moveSpeed = mTimer->DeltaTime() * 8.0;
+    }
+
     if (mInput->KeyDown(SDL_SCANCODE_W)) // forward movement with 'W' key
     {
-        if(level.data[int(pos.x + dir.x * moveSpeed)][int(pos.y)] == '0') pos.x += dir.x * moveSpeed;
-        if(level.data[int(pos.x)][int(pos.y + dir.y * moveSpeed)] == '0') pos.y += dir.y * moveSpeed;
+        if(level.data[int(pos.x + dir.x * moveSpeed)][int(pos.y)] == 0) pos.x += dir.x * moveSpeed;
+        if(level.data[int(pos.x)][int(pos.y + dir.y * moveSpeed)] == 0) pos.y += dir.y * moveSpeed;
     }
 
-    if (mInput->KeyDown(SDL_SCANCODE_S)) // backward movement with 'S' key
+    if (mInput->KeyDown(SDL_SCANCODE_S)) // backward movement with S key
     {
-        if(level.data[int(pos.x - dir.x * moveSpeed)][int(pos.y)] == '0') pos.x -= dir.x * moveSpeed;
-        if(level.data[int(pos.x)][int(pos.y - dir.y * moveSpeed)] == '0') pos.y -= dir.y * moveSpeed;
+        if(level.data[int(pos.x - dir.x * moveSpeed)][int(pos.y)] == 0) pos.x -= dir.x * moveSpeed;
+        if(level.data[int(pos.x)][int(pos.y - dir.y * moveSpeed)] == 0) pos.y -= dir.y * moveSpeed;
     }
 
-    if (mInput->KeyDown(SDL_SCANCODE_A)) // left movement with 'J' key
+    if (mInput->KeyDown(SDL_SCANCODE_A)) // left movement with J key
     {
         double newDirX = dir.x * cos(angle) - dir.y * sin(angle);
         double newDirY = dir.x * sin(angle) + dir.y * cos(angle);
 
-        if(level.data[int(pos.x + newDirX * moveSpeed)][int(pos.y)] == '0') pos.x += newDirX * moveSpeed;
-        if(level.data[int(pos.x)][int(pos.y + newDirY * moveSpeed)] == '0') pos.y += newDirY * moveSpeed;
+        if(level.data[int(pos.x + newDirX * moveSpeed)][int(pos.y)] == 0) pos.x += newDirX * moveSpeed;
+        if(level.data[int(pos.x)][int(pos.y + newDirY * moveSpeed)] == 0) pos.y += newDirY * moveSpeed;
     }
 
-    if (mInput->KeyDown(SDL_SCANCODE_D)) // right movement with 'L' key
+    if (mInput->KeyDown(SDL_SCANCODE_D)) // right movement with L key
     {
         double newDirX = dir.x * cos(-angle) - dir.y * sin(-angle);
         double newDirY = dir.x * sin(-angle) + dir.y * cos(-angle);
 
-        if(level.data[int(pos.x + newDirX * moveSpeed)][int(pos.y)] == '0') pos.x += newDirX * moveSpeed;
-        if(level.data[int(pos.x)][int(pos.y + newDirY * moveSpeed)] == '0') pos.y += newDirY * moveSpeed;
+        if(level.data[int(pos.x + newDirX * moveSpeed)][int(pos.y)] == 0) pos.x += newDirX * moveSpeed;
+        if(level.data[int(pos.x)][int(pos.y + newDirY * moveSpeed)] == 0) pos.y += newDirY * moveSpeed;
     }
 
-    if (mInput->KeyDown(SDL_SCANCODE_RIGHT)) // rotate to the right with 'D' key
+    if (mInput->KeyDown(SDL_SCANCODE_RIGHT)) // rotate to the right with D key
     {
         double oldDirX = dir.x;
         dir.x = dir.x * cos(-rotationSpeed) - dir.y * sin(-rotationSpeed);
@@ -254,7 +238,7 @@ void Raycaster::Update()
         plane.y = oldPlaneX * sin(-rotationSpeed) + plane.y * cos(-rotationSpeed);
     }
 
-    if (mInput->KeyDown(SDL_SCANCODE_LEFT)) // rotate to the left with 'A' key
+    if (mInput->KeyDown(SDL_SCANCODE_LEFT)) // rotate to the left with A key
     {
         double oldDirX = dir.x;
         dir.x = dir.x * cos(rotationSpeed) - dir.y * sin(rotationSpeed);
