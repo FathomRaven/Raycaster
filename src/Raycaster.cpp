@@ -1,26 +1,38 @@
+//TODO: Flip maps "x" and "y", to be inline with the vector2
+
 #include "Raycaster.hpp"
 
-void Raycaster::LoadMap(Level &level, const char* s) {
+void Raycaster::LoadMap(Level &map, std::string s) {
     
+    map = {};
+
     std::vector<int> line;
 
-	std::fstream fin (s);
+	std::fstream fin (s.c_str());
     std::string output;
+    int y = 0;
     while(getline(fin, output))
     {
         for (unsigned long x = 0; x < output.size(); x++)
         {
             if(output[x] != ',')
-                line.push_back(std::atoi(&output[x]));    
+                line.push_back(std::atoi(&output[x]));   
+
+            if(output[x] == 'P')
+            {
+                std::cout << y + 1<< ", " << x - 1 << "\n";
+                map.playerPosition = {(float)y + 1, (float)x - 1};   
+            }
 
         }
         // std::cout << "\n";
-        level.data.push_back(line);
+        map.data.push_back(line);
         line = {};
+        y++;
     }
 
-    level.height = level.data.size();
-    level.width = level.data[0].size();
+    map.height = map.data.size();
+    map.width = map.data[0].size();
 
 	fin.close();
 }
@@ -31,7 +43,8 @@ Raycaster::Raycaster()
     mInput = Input::Instance();
     mTimer = Timer::Instance();
 
-    LoadMap(level, "res/maps/level1.data");
+    levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
+    LoadMap(level, levelData);
 
     ceiling.x = 0;
     ceiling.y = 0;
@@ -43,7 +56,8 @@ Raycaster::Raycaster()
     floor.w = mGraphics->SCREEN_WIDTH;
     floor.h = mGraphics->SCREEN_HEIGHT/2;
 
-    pos = {3.0f, 3.0f};
+    pos = level.playerPosition;
+    // pos = {3.0, 3.0};
 
     for (unsigned int i = 0; i < level.height; i++)
     {
@@ -247,5 +261,20 @@ void Raycaster::Update()
         double oldPlaneX = plane.x;
         plane.x = plane.x * cos(rotationSpeed) - plane.y * sin(rotationSpeed);
         plane.y = oldPlaneX * sin(rotationSpeed) + plane.y * cos(rotationSpeed);
+    }
+    if(mInput->KeyPressed(SDL_SCANCODE_UP) && currentLevel < maxLevels)
+    {
+        currentLevel++;
+        levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
+        LoadMap(level, levelData);
+        // pos.x += 1.0f;
+        pos = level.playerPosition;
+    }
+    if(mInput->KeyPressed(SDL_SCANCODE_DOWN) && currentLevel > 1)
+    {
+        currentLevel--;
+        levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
+        LoadMap(level, levelData);
+        pos = level.playerPosition;
     }
 }
