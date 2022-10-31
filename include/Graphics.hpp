@@ -10,6 +10,8 @@ public:
     static const int SCREEN_WIDTH = 1024;
     static const int SCREEN_HEIGHT = 768;
 
+    SDL_Color buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+
     const char* WINDOW_TITLE = "Raycaster";
 
     static Graphics* Instance();

@@ -46,6 +46,8 @@ bool Graphics::Init()
         return false;
     }
 
+    ClearBackBuffer();
+
     mBackBuffer = SDL_GetWindowSurface(mWindow);
 
     return true;
@@ -71,11 +73,25 @@ void Graphics::ClearBackBuffer()
 {
     SDL_SetRenderDrawColor(mRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mRenderer);
+    for (unsigned int y = 0; y < SCREEN_HEIGHT; y++)
+    {
+        for (unsigned int x = 0; x < SCREEN_WIDTH; x++)
+        {
+            buffer[y][x] = {0, 0, 0, 0};
+        }
+    }
 }
 
 void Graphics::Render()
 {
+    SDL_Surface* surface = SDL_CreateRGBSurfaceFrom(buffer, SCREEN_WIDTH, SCREEN_HEIGHT, 32, SCREEN_WIDTH*4, 0x000000ff,0x0000ff00,0x00ff0000,0xff000000);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(mRenderer, surface);
+
+    SDL_RenderCopy(mRenderer, texture, NULL, NULL);
     SDL_RenderPresent(mRenderer);
+
+    SDL_FreeSurface(surface);
+    SDL_DestroyTexture(texture);
 }
 
 void Graphics::DrawLine(SDL_Color color, int startX, int startY, int endX, int endY)

@@ -43,5 +43,7 @@ private:
     unsigned int maxLevels = 2;
     std::string levelData;
 
+    unsigned int texWidth, texHeight, channels;
+
     void LoadMap(Level &map, std::string s);
 };

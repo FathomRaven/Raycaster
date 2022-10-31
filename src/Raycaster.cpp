@@ -1,4 +1,5 @@
-//TODO: Flip maps "x" and "y", to be inline with the vector2
+//TODO: Flip maps "x" and "y", to be inline with the vector2,
+//Positions are weird and bugged; Possibly related to above issue. Might be a problem with map loader
 
 #include "Raycaster.hpp"
 
@@ -20,10 +21,9 @@ void Raycaster::LoadMap(Level &map, std::string s) {
 
             if(output[x] == 'P')
             {
-                std::cout << y + 1<< ", " << x - 1 << "\n";
-                map.playerPosition = {(float)y + 1, (float)x - 1};   
+                // std::cout << y + 1<< ", " << x << "\n";
+                map.playerPosition = {(float)y + 1, (float)x };   
             }
-
         }
         // std::cout << "\n";
         map.data.push_back(line);
@@ -58,6 +58,9 @@ Raycaster::Raycaster()
 
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
+
+    texWidth = 64;
+    texHeight = 64;
 
     for (unsigned int i = 0; i < level.height; i++)
     {
@@ -197,6 +200,11 @@ void Raycaster::Render()
         }
 
         mGraphics->DrawLine(color, x, drawStart, x, drawEnd);
+
+        for (int i = drawStart; i < drawEnd; i++)
+        {
+            mGraphics->buffer[i][x] = color;
+        }
     }
 }
 
