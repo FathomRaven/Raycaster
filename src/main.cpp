@@ -14,8 +14,6 @@ int main(int argc, char ** argv){
     Input* mInput = Input::Instance();
     Timer* mTimer = Timer::Instance();
 
-    // Window app(SCREEN_WIDTH, SCREEN_HEIGHT);
-    
     Raycaster raycaster;
 
     SDL_Event event;
