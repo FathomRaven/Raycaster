@@ -4,12 +4,11 @@
 #include "Timer.hpp"
 #include "Input.hpp"
 #include "Math.hpp"
+#include "Texture.hpp"
 
-#include <string>
 #include <vector>
 #include <iostream>
 #include <fstream>
-#include <stb_image.h>
 
 struct Level
 {
@@ -33,7 +32,6 @@ private:
     Input* mInput;
 
     void LoadMap(Level &map, std::string s);
-    void LoadTexture(std::string path);
 
     Vector2 pos;
     Vector2 dir = {-1, 0};
@@ -47,7 +45,5 @@ private:
     unsigned int maxLevels = 2;
     std::string levelData;
 
-    int texWidth, texHeight, texChannels;
-
-    unsigned char* texture;
+    Texture textures[4];
 };

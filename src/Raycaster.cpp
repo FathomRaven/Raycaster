@@ -3,14 +3,6 @@
 
 #include "Raycaster.hpp"
 
-void Raycaster::LoadTexture(std::string path)
-{
-    unsigned char *img = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, 0);
-    printf("Loaded image with a width of %dpx, a height of %dpx and %d channels\n", texWidth, texHeight, texChannels);
-
-    texture = img;
-}
-
 void Raycaster::LoadMap(Level &map, std::string s) {
     
     map = {};
@@ -67,7 +59,10 @@ Raycaster::Raycaster()
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
 
-    LoadTexture("res/textures/bricks.png");
+    LoadTexture1("res/textures/bricks.png", textures[0]);
+    LoadTexture1("res/textures/stonewall.png", textures[1]);
+    LoadTexture1("res/textures/bonewall.png", textures[2]);
+    LoadTexture1("res/textures/bonewallpillar.png", textures[3]);
 
     for (unsigned int i = 0; i < level.height; i++)
     {
@@ -169,7 +164,7 @@ void Raycaster::Render()
         color.b = 0;
         color.a = 255;
 
-        // int texNum = level.data[mapc.x][mapc.y] - 1; //1 subtracted from it so that texture 0 can be used!
+        int texNum = level.data[mapc.x][mapc.y] - 1; //1 subtracted from it so that texture 0 can be used!
 
         //WallX is the exact place on the wall that was hit
         double wallX; 
@@ -178,25 +173,21 @@ void Raycaster::Render()
         wallX -= std::floor(wallX);
 
         //x coordinate on the texture
-        int texX = int(wallX * double(texWidth));
-        if(side == 0 && rayDir.x > 0) texX = texWidth - texX - 1;
-        if(side == 1 && rayDir.y < 0) texX = texWidth - texX - 1;
-
-        texX = texX*texChannels;
+        int texX = int(wallX * double(textures[texNum].width));
+        if(side == 0 && rayDir.x > 0) texX = textures[texNum].width - texX - 1;
+        if(side == 1 && rayDir.y < 0) texX = textures[texNum].width - texX - 1;
 
         // How much to increase the texture coordinate per screen pixel
-        double texStep = 1.0 * texHeight / lineHeight;
+        double texStep = 1.0 * textures[texNum].height / lineHeight;
         // Starting texture coordinate
         double texPos = (drawStart - mGraphics->SCREEN_HEIGHT / 2 + lineHeight / 2) * texStep;
         for(int y = drawStart; y<drawEnd; y++)
         {
-            // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-            int texY = (int)texPos & (texHeight - 1);
+            // Cast the texture coordinate to integer, and mask with the height of the texture - 1 in case of overflow
+            int texY = (int)texPos & (textures[texNum].height - 1);
             texPos += texStep;
-            color.r = texture[texX + (texWidth*texY)*texChannels+0];
-            color.g = texture[texX + (texWidth*texY)*texChannels+1];
-            color.b = texture[texX + (texWidth*texY)*texChannels+2];
-            color.a = texture[texX + (texWidth*texY)*texChannels+3];
+
+            color = textures[texNum].GetPixel(texX, texY);
 
             if(side == 1)
             {
