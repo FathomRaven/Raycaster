@@ -26,7 +26,7 @@ struct Texture
     }
 };
 
-inline void LoadTexture1(std::string filePath, Texture &tex)
+inline void LoadTexture(std::string filePath, Texture &tex)
 {
     tex.data = stbi_load(filePath.c_str(), &tex.width, &tex.height, &tex.channels, 0);
 }

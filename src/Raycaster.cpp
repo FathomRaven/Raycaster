@@ -59,10 +59,10 @@ Raycaster::Raycaster()
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
 
-    LoadTexture1("res/textures/bricks.png", textures[0]);
-    LoadTexture1("res/textures/stonewall.png", textures[1]);
-    LoadTexture1("res/textures/bonewall.png", textures[2]);
-    LoadTexture1("res/textures/bonewallpillar.png", textures[3]);
+    LoadTexture("res/textures/bricks.png", textures[0]);
+    LoadTexture("res/textures/stonewall.png", textures[1]);
+    LoadTexture("res/textures/bonewall.png", textures[2]);
+    LoadTexture("res/textures/bonewallpillar.png", textures[3]);
 
     for (unsigned int i = 0; i < level.height; i++)
     {
