@@ -9,6 +9,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <stb_image.h>
 
 struct Level
 {
@@ -31,6 +32,9 @@ private:
     Graphics* mGraphics;
     Input* mInput;
 
+    void LoadMap(Level &map, std::string s);
+    void LoadTexture(std::string path);
+
     Vector2 pos;
     Vector2 dir = {-1, 0};
     Vector2 plane = {0, 0.66};
@@ -43,7 +47,7 @@ private:
     unsigned int maxLevels = 2;
     std::string levelData;
 
-    unsigned int texWidth, texHeight, channels;
+    int texWidth, texHeight, texChannels;
 
-    void LoadMap(Level &map, std::string s);
+    unsigned char* texture;
 };
