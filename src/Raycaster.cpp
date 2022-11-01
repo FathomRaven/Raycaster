@@ -3,6 +3,14 @@
 
 #include "Raycaster.hpp"
 
+void Raycaster::LoadTexture(std::string path)
+{
+    unsigned char *img = stbi_load(path.c_str(), &texWidth, &texHeight, &texChannels, 0);
+    printf("Loaded image with a width of %dpx, a height of %dpx and %d channels\n", texWidth, texHeight, texChannels);
+
+    texture = img;
+}
+
 void Raycaster::LoadMap(Level &map, std::string s) {
     
     map = {};
@@ -59,8 +67,7 @@ Raycaster::Raycaster()
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
 
-    texWidth = 64;
-    texHeight = 64;
+    LoadTexture("res/textures/bricks.png");
 
     for (unsigned int i = 0; i < level.height; i++)
     {
@@ -70,7 +77,6 @@ Raycaster::Raycaster()
         }
         std::cout << std::endl;
     }
-    
 }
 
 Raycaster::~Raycaster()
@@ -162,48 +168,43 @@ void Raycaster::Render()
         color.g = 0;
         color.b = 0;
         color.a = 255;
-        switch (level.data[mapc.x][mapc.y])
+
+        // int texNum = level.data[mapc.x][mapc.y] - 1; //1 subtracted from it so that texture 0 can be used!
+
+        //WallX is the exact place on the wall that was hit
+        double wallX; 
+        if (side == 0) wallX = pos.y + perpWallDist * rayDir.y;
+        else           wallX = pos.x + perpWallDist * rayDir.x;
+        wallX -= std::floor(wallX);
+
+        //x coordinate on the texture
+        int texX = int(wallX * double(texWidth));
+        if(side == 0 && rayDir.x > 0) texX = texWidth - texX - 1;
+        if(side == 1 && rayDir.y < 0) texX = texWidth - texX - 1;
+
+        texX = texX*texChannels;
+
+        // How much to increase the texture coordinate per screen pixel
+        double texStep = 1.0 * texHeight / lineHeight;
+        // Starting texture coordinate
+        double texPos = (drawStart - mGraphics->SCREEN_HEIGHT / 2 + lineHeight / 2) * texStep;
+        for(int y = drawStart; y<drawEnd; y++)
         {
-        case 1:
-            color.r = 255;
-            break;
-        case 2:
-            color.g = 255;
-            break;
+            // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
+            int texY = (int)texPos & (texHeight - 1);
+            texPos += texStep;
+            color.r = texture[texX + (texWidth*texY)*texChannels+0];
+            color.g = texture[texX + (texWidth*texY)*texChannels+1];
+            color.b = texture[texX + (texWidth*texY)*texChannels+2];
+            color.a = texture[texX + (texWidth*texY)*texChannels+3];
 
-        case 3:
-            color.b = 255;
-            break;
-
-        case 4:
-            color.r = 140;
-            color.g = 70;
-            color.b = 20;
-            break;
-        case 5:
-            color.r = 255;
-            color.g = 0;
-            color.b = 255;
-            break;
-        
-        default:
-            color.g = 100;
-            color.b = 100;
-            break;
-        }
-
-        if(side == 1)
-        {
-            color.r = color.r / 2;
-            color.g = color.g / 2;
-            color.b = color.b / 2;
-        }
-
-        mGraphics->DrawLine(color, x, drawStart, x, drawEnd);
-
-        for (int i = drawStart; i < drawEnd; i++)
-        {
-            mGraphics->buffer[i][x] = color;
+            if(side == 1)
+            {
+                color.r = color.r / 2;
+                color.g = color.g / 2;
+                color.b = color.b / 2;
+            }
+            mGraphics->buffer[y][x] = color;
         }
     }
 }
