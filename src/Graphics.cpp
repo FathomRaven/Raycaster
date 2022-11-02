@@ -105,3 +105,18 @@ void Graphics::DrawRectangle(SDL_Color color, SDL_Rect& rect)
     SDL_SetRenderDrawColor(mRenderer, color.r, color.g, color.b, color.a);
     SDL_RenderFillRect(mRenderer, &rect);
 }
+
+void Graphics::LoadTexture(std::string filePath, Texture &tex)
+{
+    tex.data = stbi_load(filePath.c_str(), &tex.width, &tex.height, &tex.channels, 0);
+    if(tex.data == NULL)
+        CreateDefaultTexture(tex);
+}
+
+void Graphics::CreateDefaultTexture(Texture &tex)
+{
+    if(missingTexture.data == NULL)
+        missingTexture.data = stbi_load("res/textures/missing.png", &missingTexture.width, &missingTexture.height, &missingTexture.channels, 0);
+    
+    tex = missingTexture;
+}

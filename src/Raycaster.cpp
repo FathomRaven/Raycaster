@@ -1,5 +1,10 @@
-//TODO: Flip maps "x" and "y", to be inline with the vector2,
-//Positions are weird and bugged; Possibly related to above issue. Might be a problem with map loader
+/*
+* TODO:
+* Flip maps "x" and "y", to be inline with the vector2,
+* Positions are weird and bugged; Possibly related to above issue. Might be a problem with map loader
+* Something weird going on with non-square textures
+* Transparency doesn't work (?)
+*/
 
 #include "Raycaster.hpp"
 
@@ -49,25 +54,25 @@ Raycaster::Raycaster()
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
 
-    LoadTexture("res/textures/missing.png", defaultTexture);
+    mGraphics->LoadTexture("res/textures/missing.png", defaultTexture);
 
-    LoadTexture("res/textures/bricks.png", textures[0]);
-    LoadTexture("res/textures/stonewall.png", textures[1]);
-    LoadTexture("res/textures/bonewall.png", textures[2]);
-    LoadTexture("res/textures/bonewallpillar.png", textures[3]);
-    LoadTexture("res/textures/cat.png", textures[4]);
+    mGraphics->LoadTexture("res/textures/bricks.png", textures[0]);
+    mGraphics->LoadTexture("res/textures/stonewall.png", textures[1]);
+    mGraphics->LoadTexture("res/textures/bone_wall.png", textures[2]);
+    mGraphics->LoadTexture("res/textures/bone_wall_pillar.png", textures[3]);
+    mGraphics->LoadTexture("res/textures/cat.png", textures[4]);
 
-    LoadTexture("res/textures/metal.png", floorTexture);
-    LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
+    mGraphics->LoadTexture("res/textures/metal.png", floorTexture);
+    mGraphics->LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
 
-    for (unsigned int i = 0; i < level.height; i++)
-    {
-        for (unsigned int j = 0; j < level.width; j++)
-        {
-            std::cout << level.data[i][j];
-        }
-        std::cout << std::endl;
-    }
+    // for (unsigned int i = 0; i < level.height; i++)
+    // {
+    //     for (unsigned int j = 0; j < level.width; j++)
+    //     {
+    //         std::cout << level.data[i][j];
+    //     }
+    //     std::cout << std::endl;
+    // }
 }
 
 Raycaster::~Raycaster()

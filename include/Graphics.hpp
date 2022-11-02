@@ -1,7 +1,8 @@
 #pragma once
 
-#include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+
+#include "Texture.hpp"
 
 class Graphics
 {    
@@ -22,6 +23,8 @@ public:
     void Render();
     void DrawLine(SDL_Color color, int startX, int startY, int endX, int endY);
     void DrawRectangle(SDL_Color color, SDL_Rect& rect);
+    void LoadTexture(std::string filePath, Texture &tex);
+    void CreateDefaultTexture(Texture &tex);
 
 private:
     static Graphics* sInstance;
@@ -30,6 +33,8 @@ private:
     SDL_Window* mWindow;
     SDL_Renderer* mRenderer;
     SDL_Surface* mBackBuffer;
+
+    Texture missingTexture;
 
     Graphics();
     ~Graphics();

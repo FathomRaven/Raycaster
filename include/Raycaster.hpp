@@ -4,7 +4,6 @@
 #include "Timer.hpp"
 #include "Input.hpp"
 #include "Math.hpp"
-#include "Texture.hpp"
 
 #include <vector>
 #include <iostream>
