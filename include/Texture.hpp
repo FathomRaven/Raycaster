@@ -24,8 +24,3 @@ struct Texture
         return color;
     }
 };
-
-inline void LoadTexture(std::string filePath, Texture &tex)
-{
-    tex.data = stbi_load(filePath.c_str(), &tex.width, &tex.height, &tex.channels, 0);
-}
