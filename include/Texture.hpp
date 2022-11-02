@@ -4,7 +4,6 @@
 #include <SDL2/SDL.h>
 #include <stb_image.h>
 
-
 struct Texture
 {
     int width, height, channels;

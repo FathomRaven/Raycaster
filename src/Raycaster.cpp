@@ -46,23 +46,19 @@ Raycaster::Raycaster()
     levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
     LoadMap(level, levelData);
 
-    ceiling.x = 0;
-    ceiling.y = 0;
-    ceiling.w = mGraphics->SCREEN_WIDTH;
-    ceiling.h = mGraphics->SCREEN_HEIGHT/2;
-
-    floor.x = 0;
-    floor.y = mGraphics->SCREEN_HEIGHT/2;
-    floor.w = mGraphics->SCREEN_WIDTH;
-    floor.h = mGraphics->SCREEN_HEIGHT/2;
-
     pos = level.playerPosition;
     // pos = {3.0, 3.0};
+
+    LoadTexture("res/textures/missing.png", defaultTexture);
 
     LoadTexture("res/textures/bricks.png", textures[0]);
     LoadTexture("res/textures/stonewall.png", textures[1]);
     LoadTexture("res/textures/bonewall.png", textures[2]);
     LoadTexture("res/textures/bonewallpillar.png", textures[3]);
+    LoadTexture("res/textures/cat.png", textures[4]);
+
+    LoadTexture("res/textures/metal.png", floorTexture);
+    LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
 
     for (unsigned int i = 0; i < level.height; i++)
     {
@@ -83,8 +79,57 @@ Raycaster::~Raycaster()
 
 void Raycaster::Render()
 {
-    mGraphics->DrawRectangle({130, 130, 130, 255}, ceiling);
-    mGraphics->DrawRectangle({130, 70, 30, 255}, floor);
+    //Render floor and ceiling
+    for(int y = 0; y < mGraphics->SCREEN_HEIGHT; y++)
+    {
+      // Leftmost rays
+      Vector2 rayDir0(dir.x - plane.x, dir.y - plane.y);
+      Vector2 rayDir1(dir.x + plane.x, dir.y + plane.y);
+
+      // Y position compared to horizon
+      int p = y - mGraphics->SCREEN_HEIGHT / 2;
+
+      // Vertical position of the camera
+      float posZ = 0.5 * mGraphics->SCREEN_HEIGHT;
+
+      // Horizontal distance from the camera to the floor for the current row we're drawing
+      // 0.5 is the z position exactly in the middle between the floor and ceiling
+      float rowDistance = posZ / p;
+
+      // Calculate the real world step vector we have to add for each x (parallel to camera plane)
+      // Adding step by step avoids multiplications with a weight in the inner loop
+      float floorStepX = rowDistance * (rayDir1.x - rayDir0.x) / mGraphics->SCREEN_WIDTH;
+      float floorStepY = rowDistance * (rayDir1.y - rayDir0.y) / mGraphics->SCREEN_WIDTH;
+
+      // Real world coordinates of the leftmost column. This will be updated as we step to the right.
+      float floorX = pos.x + rowDistance * rayDir0.x;
+      float floorY = pos.y + rowDistance * rayDir0.y;
+
+      for(int x = 0; x < mGraphics->SCREEN_WIDTH; ++x)
+      {
+        // The cell coord is simply got from the integer parts of floorX and floorY
+        int cellX = (int)(floorX);
+        int cellY = (int)(floorY);
+
+        // Get the texture coordinate from the fractional part
+        int tx = (int)(floorTexture.width * (floorX - cellX)) & (floorTexture.width - 1);
+        int ty = (int)(floorTexture.height * (floorY - cellY)) & (floorTexture.height - 1);
+
+        floorX += floorStepX;
+        floorY += floorStepY;
+
+        //Color
+        SDL_Color color;
+
+        // Draw floor
+        color = floorTexture.GetPixel(tx, ty);
+        mGraphics->buffer[y][x] = color;
+
+        //Draw ceiling (symmetrical, at screen height - y - 1 instead of y)
+        color = ceilingTexture.GetPixel(tx, ty);
+        mGraphics->buffer[mGraphics->SCREEN_HEIGHT - y - 1][x] = color;
+      }
+    }
 
     //Draw here
     for (int x = 0; x < mGraphics->SCREEN_WIDTH; x++)
