@@ -37,13 +37,13 @@ private:
     Vector2 dir = {-1, 0};
     Vector2 plane = {0, 0.66};
 
-    SDL_Rect ceiling;
-    SDL_Rect floor;
-
     Level level;
     unsigned int currentLevel = 1;
     unsigned int maxLevels = 2;
     std::string levelData;
 
-    Texture textures[4];
+    Texture textures[5];
+    Texture floorTexture;
+    Texture ceilingTexture;
+    Texture defaultTexture;
 };
