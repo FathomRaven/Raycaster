@@ -1,3 +1,13 @@
+/*
+* TODO:
+* Flip maps "x" and "y", to be inline with the vector2,
+* Positions are weird and bugged; Possibly related to above issue. Might be a problem with map loader
+* Something weird going on with non-square textures
+* Transparency doesn't work (?)
+* Modify default texture loading 
+* Aspect ratio deforms the display
+*/
+
 #include <iostream>
 #include <string>
 #include <vector>

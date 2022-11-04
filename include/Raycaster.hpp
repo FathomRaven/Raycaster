@@ -8,12 +8,19 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 struct Level
 {
     unsigned int width, height;
     std::vector<std::vector<int>> data;
     Vector2 playerPosition;
+};
+
+struct Sprite
+{
+    Vector2 position;
+    int texture;
 };
 
 class Raycaster
@@ -31,6 +38,7 @@ private:
     Input* mInput;
 
     void LoadMap(Level &map, std::string s);
+    void SortSprites(int* order, double* dist, int amount);
 
     Vector2 pos;
     Vector2 dir = {-1, 0};
@@ -41,8 +49,15 @@ private:
     unsigned int maxLevels = 2;
     std::string levelData;
 
+    static const unsigned int spriteCount = 2;
+
+    int spriteOrder[spriteCount];
+    double spriteDistance[spriteCount];
+
+    Sprite sprites[spriteCount];
+
     Texture textures[5];
     Texture floorTexture;
     Texture ceilingTexture;
-    Texture defaultTexture;
+    Texture spriteTextures[2];
 };
