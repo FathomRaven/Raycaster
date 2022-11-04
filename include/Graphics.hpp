@@ -12,6 +12,7 @@ public:
     static const int SCREEN_HEIGHT = 720;
 
     SDL_Color buffer[SCREEN_HEIGHT][SCREEN_WIDTH];
+    double ZBuffer[SCREEN_WIDTH];
 
     const char* WINDOW_TITLE = "Raycaster";
 

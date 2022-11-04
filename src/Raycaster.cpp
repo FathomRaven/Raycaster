@@ -1,46 +1,4 @@
-/*
-* TODO:
-* Flip maps "x" and "y", to be inline with the vector2,
-* Positions are weird and bugged; Possibly related to above issue. Might be a problem with map loader
-* Something weird going on with non-square textures
-* Transparency doesn't work (?)
-*/
-
 #include "Raycaster.hpp"
-
-void Raycaster::LoadMap(Level &map, std::string s) {
-    
-    map = {};
-
-    std::vector<int> line;
-
-	std::fstream fin (s.c_str());
-    std::string output;
-    int y = 0;
-    while(getline(fin, output))
-    {
-        for (unsigned long x = 0; x < output.size(); x++)
-        {
-            if(output[x] != ',')
-                line.push_back(std::atoi(&output[x]));   
-
-            if(output[x] == 'P')
-            {
-                // std::cout << y + 1<< ", " << x << "\n";
-                map.playerPosition = {(float)y + 1, (float)x };   
-            }
-        }
-        // std::cout << "\n";
-        map.data.push_back(line);
-        line = {};
-        y++;
-    }
-
-    map.height = map.data.size();
-    map.width = map.data[0].size();
-
-	fin.close();
-}
 
 Raycaster::Raycaster()
 {
@@ -52,9 +10,6 @@ Raycaster::Raycaster()
     LoadMap(level, levelData);
 
     pos = level.playerPosition;
-    // pos = {3.0, 3.0};
-
-    mGraphics->LoadTexture("res/textures/missing.png", defaultTexture);
 
     mGraphics->LoadTexture("res/textures/bricks.png", textures[0]);
     mGraphics->LoadTexture("res/textures/stonewall.png", textures[1]);
@@ -64,6 +19,11 @@ Raycaster::Raycaster()
 
     mGraphics->LoadTexture("res/textures/metal.png", floorTexture);
     mGraphics->LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
+
+    mGraphics->LoadTexture("res/textures/ham.png", spriteTextures[0]);
+
+    sprites[0] = {{3, 3}, 0};
+    sprites[1] = {{3, 5}, 0};
 
     // for (unsigned int i = 0; i < level.height; i++)
     // {
@@ -87,56 +47,56 @@ void Raycaster::Render()
     //Render floor and ceiling
     for(int y = 0; y < mGraphics->SCREEN_HEIGHT; y++)
     {
-      // Leftmost rays
-      Vector2 rayDir0(dir.x - plane.x, dir.y - plane.y);
-      Vector2 rayDir1(dir.x + plane.x, dir.y + plane.y);
+        // Leftmost rays
+        Vector2 rayDir0(dir.x - plane.x, dir.y - plane.y);
+        Vector2 rayDir1(dir.x + plane.x, dir.y + plane.y);
 
-      // Y position compared to horizon
-      int p = y - mGraphics->SCREEN_HEIGHT / 2;
+        // Y position compared to horizon
+        int p = y - mGraphics->SCREEN_HEIGHT / 2;
 
-      // Vertical position of the camera
-      float posZ = 0.5 * mGraphics->SCREEN_HEIGHT;
+        // Vertical position of the camera
+        float posZ = 0.5 * mGraphics->SCREEN_HEIGHT;
 
-      // Horizontal distance from the camera to the floor for the current row we're drawing
-      // 0.5 is the z position exactly in the middle between the floor and ceiling
-      float rowDistance = posZ / p;
+        // Horizontal distance from the camera to the floor for the current row we're drawing
+        // 0.5 is the z position exactly in the middle between the floor and ceiling
+        float rowDistance = posZ / p;
 
-      // Calculate the real world step vector we have to add for each x (parallel to camera plane)
-      // Adding step by step avoids multiplications with a weight in the inner loop
-      float floorStepX = rowDistance * (rayDir1.x - rayDir0.x) / mGraphics->SCREEN_WIDTH;
-      float floorStepY = rowDistance * (rayDir1.y - rayDir0.y) / mGraphics->SCREEN_WIDTH;
+        // Calculate the real world step vector we have to add for each x (parallel to camera plane)
+        // Adding step by step avoids multiplications with a weight in the inner loop
+        float floorStepX = rowDistance * (rayDir1.x - rayDir0.x) / mGraphics->SCREEN_WIDTH;
+        float floorStepY = rowDistance * (rayDir1.y - rayDir0.y) / mGraphics->SCREEN_WIDTH;
 
-      // Real world coordinates of the leftmost column. This will be updated as we step to the right.
-      float floorX = pos.x + rowDistance * rayDir0.x;
-      float floorY = pos.y + rowDistance * rayDir0.y;
+        // Real world coordinates of the leftmost column. This will be updated as we step to the right.
+        float floorX = pos.x + rowDistance * rayDir0.x;
+        float floorY = pos.y + rowDistance * rayDir0.y;
 
-      for(int x = 0; x < mGraphics->SCREEN_WIDTH; ++x)
-      {
-        // The cell coord is simply got from the integer parts of floorX and floorY
-        int cellX = (int)(floorX);
-        int cellY = (int)(floorY);
+        for(int x = 0; x < mGraphics->SCREEN_WIDTH; ++x)
+        {
+            // The cell coord is simply got from the integer parts of floorX and floorY
+            int cellX = (int)(floorX);
+            int cellY = (int)(floorY);
 
-        // Get the texture coordinate from the fractional part
-        int tx = (int)(floorTexture.width * (floorX - cellX)) & (floorTexture.width - 1);
-        int ty = (int)(floorTexture.height * (floorY - cellY)) & (floorTexture.height - 1);
+            // Get the texture coordinate from the fractional part
+            int tx = (int)(floorTexture.width * (floorX - cellX)) & (floorTexture.width - 1);
+            int ty = (int)(floorTexture.height * (floorY - cellY)) & (floorTexture.height - 1);
 
-        floorX += floorStepX;
-        floorY += floorStepY;
+            floorX += floorStepX;
+            floorY += floorStepY;
 
-        //Color
-        SDL_Color color;
+            //Color
+            SDL_Color color;
 
-        // Draw floor
-        color = floorTexture.GetPixel(tx, ty);
-        mGraphics->buffer[y][x] = color;
+            // Draw floor
+            color = floorTexture.GetPixel(tx, ty);
+            mGraphics->buffer[y][x] = color;
 
-        //Draw ceiling (symmetrical, at screen height - y - 1 instead of y)
-        color = ceilingTexture.GetPixel(tx, ty);
-        mGraphics->buffer[mGraphics->SCREEN_HEIGHT - y - 1][x] = color;
-      }
+            //Draw ceiling (symmetrical, at screen height - y - 1 instead of y)
+            color = ceilingTexture.GetPixel(tx, ty);
+            mGraphics->buffer[mGraphics->SCREEN_HEIGHT - y - 1][x] = color;
+        }
     }
 
-    //Draw here
+    //Walls draw here
     for (int x = 0; x < mGraphics->SCREEN_WIDTH; x++)
     {
         float cameraX = 2*x / float(mGraphics->SCREEN_WIDTH) - 1; //x-coord in camera space. "Normalizes" the coordinates so to speak
@@ -245,7 +205,64 @@ void Raycaster::Render()
                 color.g = color.g / 2;
                 color.b = color.b / 2;
             }
+
             mGraphics->buffer[y][x] = color;
+        }
+
+        mGraphics->ZBuffer[x] = perpWallDist;
+    }
+
+    //SPRITE CASTING
+    //sort sprites from far to close
+    for(unsigned int i = 0; i < spriteCount; i++)
+    {
+      spriteOrder[i] = i;
+      spriteDistance[i] = ((pos.x - sprites[i].position.x) * (pos.x - sprites[i].position.x) + (pos.y - sprites[i].position.y) * (pos.y - sprites[i].position.y)); //sqrt not taken, unneeded
+    }
+    SortSprites(spriteOrder, spriteDistance, spriteCount);
+
+    //after sorting the sprites, do the projection and draw them
+    for(unsigned int i = 0; i < spriteCount; i++)
+    {
+        Vector2 spritePos = {sprites[spriteOrder[i]].position.x - pos.x, sprites[spriteOrder[i]].position.y - pos.y};
+
+        float invDet = 1.0 / (plane.x * dir.y - dir.x * plane.y); //required for correct matrix multiplication
+
+        Vector2 transform = {invDet * (dir.y * spritePos.x - dir.x * spritePos.y), invDet * (-plane.y * spritePos.x + plane.x * spritePos.y)};
+
+        int spriteScreenX = int((mGraphics->SCREEN_WIDTH / 2) * (1 + transform.x / transform.y));
+
+        //Calculate the sprites height and width
+        int spriteHeight = abs(int(mGraphics->SCREEN_HEIGHT / (transform.y))); //using 'transformY' instead of the real distance prevents fisheye
+        int spriteWidth = abs( int (mGraphics->SCREEN_HEIGHT / (transform.y)));
+        //Calculate the lowest and highest pixel to fill in current stripe
+        Vector2i drawStart = {-spriteWidth / 2 + spriteScreenX, -spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2};
+        
+        if(drawStart.x < 0) drawStart.x = 0;
+        if(drawStart.y < 0) drawStart.y = 0;
+
+        Vector2i drawEnd = {spriteWidth / 2 + spriteScreenX, spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2};
+
+        if(drawEnd.y >= mGraphics->SCREEN_HEIGHT) drawEnd.y = mGraphics->SCREEN_HEIGHT - 1;
+        if(drawEnd.x >= mGraphics->SCREEN_WIDTH) drawEnd.x = mGraphics->SCREEN_WIDTH - 1;
+
+        unsigned int texWidth = spriteTextures[sprites[spriteOrder[i]].texture].width;
+        unsigned int texHeight = spriteTextures[sprites[spriteOrder[i]].texture].height;
+
+        //loop through every vertical stripe of the sprite on screen
+        for(int stripe = drawStart.x; stripe < drawEnd.x; stripe++)
+        {
+            int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * texWidth / spriteWidth) / 256;
+            //Check to make sure the line should be drawn or not
+            if(transform.y > 0 && stripe > 0 && stripe < mGraphics->SCREEN_WIDTH && transform.y < mGraphics->ZBuffer[stripe])
+            for(int y = drawStart.y; y < drawEnd.y; y++)
+            {
+                int d = (y) * 256 - mGraphics->SCREEN_HEIGHT * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
+                int texY = ((d * texHeight) / spriteHeight) / 256;
+                SDL_Color color = spriteTextures[sprites[spriteOrder[i]].texture].GetPixel(texX, texY);
+                if(color.a == 255) //Check if pixel is transparent
+                    mGraphics->buffer[y][stripe] = color;
+            }
         }
     }
 }
@@ -326,5 +343,53 @@ void Raycaster::Update()
         levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
         LoadMap(level, levelData);
         pos = level.playerPosition;
+    }
+}
+
+void Raycaster::LoadMap(Level &map, std::string s) {
+    
+    map = {};
+
+    std::vector<int> line;
+
+	std::fstream fin (s.c_str());
+    std::string output;
+    int y = 0;
+    while(getline(fin, output))
+    {
+        for (unsigned long x = 0; x < output.size(); x++)
+        {
+            if(output[x] != ',')
+                line.push_back(std::atoi(&output[x]));   
+
+            if(output[x] == 'P')
+            {
+                // std::cout << y + 1<< ", " << x << "\n";
+                map.playerPosition = {(float)y + 1, (float)x };   
+            }
+        }
+        // std::cout << "\n";
+        map.data.push_back(line);
+        line = {};
+        y++;
+    }
+
+    map.height = map.data.size();
+    map.width = map.data[0].size();
+
+	fin.close();
+}
+
+void Raycaster::SortSprites(int* order, double* dist, int amount)
+{
+    std::vector<std::pair<double, int>> sprites(amount);
+    for(int i = 0; i < amount; i++) {
+        sprites[i].first = dist[i];
+        sprites[i].second = order[i];
+    }
+    std::sort(sprites.begin(), sprites.end());
+    for(int i = 0; i < amount; i++) {
+        dist[i] = sprites[amount - i - 1].first;
+        order[i] = sprites[amount - i - 1].second;
     }
 }
