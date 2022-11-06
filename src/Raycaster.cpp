@@ -20,10 +20,11 @@ Raycaster::Raycaster()
     mGraphics->LoadTexture("res/textures/metal.png", floorTexture);
     mGraphics->LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
 
-    mGraphics->LoadTexture("res/textures/ham.png", spriteTextures[0]);
-
-    sprites[0] = {{3, 3}, 0};
-    sprites[1] = {{3, 5}, 0};
+    mGraphics->LoadTexture("res/textures/cat.png", spriteTextures[0]);
+                /* POSITION, Z, TEXTURE, SCALE */
+    sprites[0] = {{2, 10}, 32.0f, 0, {1, 1}};
+    // sprites[0].zPosition = spriteTextures[sprites[0].textureIndex].height;
+    sprites[1] = {{2, 10.553}, 0.0f, 0, {1, 1}};
 
     // for (unsigned int i = 0; i < level.height; i++)
     // {
@@ -44,7 +45,7 @@ Raycaster::~Raycaster()
 
 void Raycaster::Render()
 {
-    //Render floor and ceiling
+    //*----------- FLOOR AND CEILING CASTING -----------*//
     for(int y = 0; y < mGraphics->SCREEN_HEIGHT; y++)
     {
         // Leftmost rays
@@ -96,7 +97,7 @@ void Raycaster::Render()
         }
     }
 
-    //Walls draw here
+    //*----------- WALL CASTING -----------*//
     for (int x = 0; x < mGraphics->SCREEN_WIDTH; x++)
     {
         float cameraX = 2*x / float(mGraphics->SCREEN_WIDTH) - 1; //x-coord in camera space. "Normalizes" the coordinates so to speak
@@ -212,8 +213,8 @@ void Raycaster::Render()
         mGraphics->ZBuffer[x] = perpWallDist;
     }
 
-    //SPRITE CASTING
-    //sort sprites from far to close
+    //*----------- SPRITE CASTING -----------*//
+    //Sort sprites from far to close
     for(unsigned int i = 0; i < spriteCount; i++)
     {
       spriteOrder[i] = i;
@@ -221,33 +222,37 @@ void Raycaster::Render()
     }
     SortSprites(spriteOrder, spriteDistance, spriteCount);
 
-    //after sorting the sprites, do the projection and draw them
+    //After sorting the sprites, do the projection and draw them
     for(unsigned int i = 0; i < spriteCount; i++)
     {
-        Vector2 spritePos = {sprites[spriteOrder[i]].position.x - pos.x, sprites[spriteOrder[i]].position.y - pos.y};
+        Sprite sprite = sprites[spriteOrder[i]];
+        
+        Vector2 spritePos = {sprite.position.x - pos.x, sprite.position.y - pos.y};
 
-        float invDet = 1.0 / (plane.x * dir.y - dir.x * plane.y); //required for correct matrix multiplication
+        float invDet = 1.0 / (plane.x * dir.y - dir.x * plane.y); //For matrix multiplication 
 
-        Vector2 transform = {invDet * (dir.y * spritePos.x - dir.x * spritePos.y), invDet * (-plane.y * spritePos.x + plane.x * spritePos.y)};
+        Vector2 transform = {invDet * (dir.y * spritePos.x - dir.x * spritePos.y), (invDet * (-plane.y * spritePos.x + plane.x * spritePos.y))};
 
         int spriteScreenX = int((mGraphics->SCREEN_WIDTH / 2) * (1 + transform.x / transform.y));
 
         //Calculate the sprites height and width
-        int spriteHeight = abs(int(mGraphics->SCREEN_HEIGHT / (transform.y))); //using 'transformY' instead of the real distance prevents fisheye
-        int spriteWidth = abs( int (mGraphics->SCREEN_HEIGHT / (transform.y)));
+        int spriteHeight = abs(int(mGraphics->SCREEN_HEIGHT / (transform.y)))*sprite.scale.y;
+        int spriteWidth =  abs(int(mGraphics->SCREEN_HEIGHT / (transform.y)))*sprite.scale.x;
+
+        unsigned int texWidth = spriteTextures[sprite.textureIndex].width;
+        unsigned int texHeight = spriteTextures[sprite.textureIndex].height;
+
+        int vMoveScreen = int(spriteHeight/(texHeight/sprite.zPosition));
         //Calculate the lowest and highest pixel to fill in current stripe
-        Vector2i drawStart = {-spriteWidth / 2 + spriteScreenX, -spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2};
+        Vector2i drawStart = {-spriteWidth / 2 + spriteScreenX, -spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2 + (vMoveScreen)};
         
         if(drawStart.x < 0) drawStart.x = 0;
         if(drawStart.y < 0) drawStart.y = 0;
 
-        Vector2i drawEnd = {spriteWidth / 2 + spriteScreenX, spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2};
+        Vector2i drawEnd = {spriteWidth / 2 + spriteScreenX, spriteHeight / 2 + mGraphics->SCREEN_HEIGHT / 2 + (vMoveScreen)};
 
         if(drawEnd.y >= mGraphics->SCREEN_HEIGHT) drawEnd.y = mGraphics->SCREEN_HEIGHT - 1;
         if(drawEnd.x >= mGraphics->SCREEN_WIDTH) drawEnd.x = mGraphics->SCREEN_WIDTH - 1;
-
-        unsigned int texWidth = spriteTextures[sprites[spriteOrder[i]].texture].width;
-        unsigned int texHeight = spriteTextures[sprites[spriteOrder[i]].texture].height;
 
         //loop through every vertical stripe of the sprite on screen
         for(int stripe = drawStart.x; stripe < drawEnd.x; stripe++)
@@ -257,9 +262,9 @@ void Raycaster::Render()
             if(transform.y > 0 && stripe > 0 && stripe < mGraphics->SCREEN_WIDTH && transform.y < mGraphics->ZBuffer[stripe])
             for(int y = drawStart.y; y < drawEnd.y; y++)
             {
-                int d = (y) * 256 - mGraphics->SCREEN_HEIGHT * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
+                int d = (y-vMoveScreen) * 256 - mGraphics->SCREEN_HEIGHT * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
                 int texY = ((d * texHeight) / spriteHeight) / 256;
-                SDL_Color color = spriteTextures[sprites[spriteOrder[i]].texture].GetPixel(texX, texY);
+                SDL_Color color = spriteTextures[sprite.textureIndex].GetPixel(texX, texY);
                 if(color.a == 255) //Check if pixel is transparent
                     mGraphics->buffer[y][stripe] = color;
             }
@@ -334,7 +339,6 @@ void Raycaster::Update()
         currentLevel++;
         levelData = "res/maps/level" + std::to_string(currentLevel) + ".data";
         LoadMap(level, levelData);
-        // pos.x += 1.0f;
         pos = level.playerPosition;
     }
     if(mInput->KeyPressed(SDL_SCANCODE_DOWN) && currentLevel > 1)

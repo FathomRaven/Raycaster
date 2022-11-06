@@ -6,6 +6,9 @@
 * Transparency doesn't work (?)
 * Modify default texture loading 
 * Aspect ratio deforms the display
+* Sprite Z position does not function correctly
+*   Can not easily play sprite on to floor
+*   Update: Made some progress, but very finicky and annoying
 */
 
 #include <iostream>
