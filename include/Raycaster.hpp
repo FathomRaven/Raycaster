@@ -4,6 +4,7 @@
 #include "Timer.hpp"
 #include "Input.hpp"
 #include "Math.hpp"
+#include "Sprite.hpp"
 
 #include <vector>
 #include <iostream>
@@ -15,12 +16,6 @@ struct Level
     unsigned int width, height;
     std::vector<std::vector<int>> data;
     Vector2 playerPosition;
-};
-
-struct Sprite
-{
-    Vector2 position;
-    int texture;
 };
 
 class Raycaster
