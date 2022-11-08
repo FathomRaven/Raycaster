@@ -36,8 +36,8 @@ private:
     void SortSprites(int* order, double* dist, int amount);
 
     Vector2 pos;
-    Vector2 dir = {-1, 0};
-    Vector2 plane = {0, 0.66};
+    Vector2 dir = {-1.0, 0};
+    Vector2 plane = {0.0, 0.66};
 
     Level level;
     unsigned int currentLevel = 1;
