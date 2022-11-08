@@ -23,17 +23,7 @@ Raycaster::Raycaster()
     mGraphics->LoadTexture("res/textures/cat.png", spriteTextures[0]);
                 /* POSITION, Z, TEXTURE, SCALE */
     sprites[0] = {{2, 10}, 32.0f, 0, {1, 1}};
-    // sprites[0].zPosition = spriteTextures[sprites[0].textureIndex].height;
     sprites[1] = {{2, 10.553}, 0.0f, 0, {1, 1}};
-
-    // for (unsigned int i = 0; i < level.height; i++)
-    // {
-    //     for (unsigned int j = 0; j < level.width; j++)
-    //     {
-    //         std::cout << level.data[i][j];
-    //     }
-    //     std::cout << std::endl;
-    // }
 }
 
 Raycaster::~Raycaster()
@@ -136,8 +126,8 @@ void Raycaster::Render()
             sideDist.y = (mapc.y + 1.0 - rayPos.y) * deltaDist.y;
         }
 
-        // check if the casted ray has hit an object
-        while(hit == 0) // calculate ray until it hits an object
+        // Check if the casted ray has hit an object
+        while(hit == 0) // Calculate ray until it hits an object
         {
             if(sideDist.x < sideDist.y)
             {
