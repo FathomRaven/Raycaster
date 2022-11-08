@@ -3,7 +3,7 @@
 #         Written by FathomRaven on GitHub        #
 #         Inspired heavily by lodev.com's         #
 #            raycaster tutorial series            #
-#         Art comes from OpenGameArt.com          #
+#         Art comes from OpenGameArt.org          #
 #             Uses SDL2 for rendering             #
 ###################################################
 
