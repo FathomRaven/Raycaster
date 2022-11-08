@@ -31,6 +31,12 @@ Textured raycaster made in C++ with SDL2, akin to Wolfenstein 3D.
 * [bricks.png](https://opengameart.org/content/bricks-tiled-texture-64x64) by alpha_rats<br>
 * [stonewall.png](https://opengameart.org/node/8041) by West:
 
+## Screenshots
+***
+![screenshot1](screenshots/screenshot1.png)
+![screenshot2](screenshots/screenshot2.png)
+![screenshot3](screenshots/screenshot3.png)
+
 ## Requirements
 ***
 This project requires:
