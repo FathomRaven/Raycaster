@@ -20,10 +20,10 @@ Raycaster::Raycaster()
     mGraphics->LoadTexture("res/textures/metal.png", floorTexture);
     mGraphics->LoadTexture("res/textures/metal_ceiling.png", ceilingTexture);
 
-    mGraphics->LoadTexture("res/textures/cat.png", spriteTextures[0]);
+    mGraphics->LoadTexture("res/textures/barrel.png", spriteTextures[0]);
                 /* POSITION, Z, TEXTURE, SCALE */
-    sprites[0] = {{2, 10}, 32.0f, 0, {1, 1}};
-    sprites[1] = {{2, 10.553}, 0.0f, 0, {1, 1}};
+    sprites[0] = {{2, 11}, 12.8f, 0, {0.8, 0.8}};
+    sprites[1] = {{5, 11}, 12.8f, 0, {0.8f, 0.8f}};
 }
 
 Raycaster::~Raycaster()
@@ -255,7 +255,7 @@ void Raycaster::Render()
                 int d = (y-vMoveScreen) * 256 - mGraphics->SCREEN_HEIGHT * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
                 int texY = ((d * texHeight) / spriteHeight) / 256;
                 SDL_Color color = spriteTextures[sprite.textureIndex].GetPixel(texX, texY);
-                if(color.a == 255) //Check if pixel is transparent
+                if(color.a > 150) //Renders pixels of a certain transparency
                     mGraphics->buffer[y][stripe] = color;
             }
         }
