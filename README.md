@@ -45,18 +45,7 @@ This project requires:
 
 ## Compiling
 ***
-Simply compile with your compiler as choice, in this case clang, with the following parameters:
-
+This project uses CMake. Run 
 ```
-clang++ src/*.cpp -I./include/ -lSDL2main -lSDL2 -o main
-```
-
-Makefile may or may not work depending on your setup
-
-## Running
-***
-Run the executable from compilation, either by double clicking it or running:
-
-```
-./main
+cmake CMakeLists.txt
 ```
