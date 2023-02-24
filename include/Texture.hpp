@@ -2,7 +2,7 @@
 
 #include <string>
 #include <SDL2/SDL.h>
-#include <stb_image.h>
+#include <stb/stb_image.h>
 
 struct Texture
 {
